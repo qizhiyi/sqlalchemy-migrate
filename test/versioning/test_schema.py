@@ -44,19 +44,6 @@ class TestControlledSchema(fixture.Pathed, fixture.DB):
         super(TestControlledSchema, self).tearDown()
 
     @fixture.usedb()
-    def test_schema_table_fail(self):
-        """Test scenarios when loading schema should fail"""
-        dbcontrol = ControlledSchema.create(self.engine, self.path_repos)
-        dbcontrol.table.drop()
-
-        try:
-            dbcontrol.load()
-        except exceptions.DatabaseNotControlledError:
-            pass
-        else:
-            self.fail()
-
-    @fixture.usedb()
     def test_version_control(self):
         """Establish version control on a particular database"""
         # Establish version control on this database
@@ -128,7 +115,7 @@ class TestControlledSchema(fixture.Pathed, fixture.DB):
             #self.assertRaises(ControlledSchema.InvalidVersionError,
             # Can't have custom errors with assertRaises...
             try:
-                ControlledSchema.create(self.engine, self.repos,version)
+                ControlledSchema.create(self.engine, self.repos, version)
                 self.assert_(False, repr(version))
             except exceptions.InvalidVersionError:
                 pass

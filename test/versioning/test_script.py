@@ -63,7 +63,7 @@ class TestPyScript(fixture.Pathed, fixture.DB):
         try:
             pyscript.run(self.engine, 1)
             pyscript.run(self.engine, -1)
-        except TypeError:
+        except exceptions.ScriptError:
             pass
         else:
             self.fail()

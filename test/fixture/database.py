@@ -6,6 +6,7 @@ from decorator import decorator
 
 from sqlalchemy import create_engine, Table, MetaData
 from sqlalchemy.orm import create_session
+from sqlalchemy.pool import StaticPool
 
 from migrate.versioning.util import Memoize
 from test.fixture.base import Base
@@ -17,6 +18,8 @@ def readurls():
     """read URLs from config file return a list"""
     # TODO: remove tmpfile since sqlite can store db in memory
     filename = 'test_db.cfg'
+    ret = list()
+    tmpfile = Pathed.tmp()
     fullpath = os.path.join(os.curdir, filename)
 
     try:
@@ -24,9 +27,6 @@ def readurls():
     except IOError:
         raise IOError("""You must specify the databases to use for testing!
 Copy %(filename)s.tmpl to %(filename)s and edit your database URLs.""" % locals())
-
-    ret = list()
-    tmpfile = Pathed.tmp()
 
     for line in fd:
         if line.startswith('#'):
@@ -98,7 +98,7 @@ class DB(Base):
     
     def _connect(self, url):
         self.url = url
-        self.engine = create_engine(url, echo=True)
+        self.engine = create_engine(url, echo=True, poolclass=StaticPool)
         self.meta = MetaData(bind=self.engine)
         if self.level < self.CONNECT: 
             return

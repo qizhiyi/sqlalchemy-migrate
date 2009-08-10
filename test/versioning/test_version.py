@@ -76,7 +76,6 @@ class TestVersion(fixture.Pathed):
 
     def test_str_to_filename(self):
         self.assertEquals(str_to_filename(''), '')
-        self.assertEquals(str_to_filename(''), '')
         self.assertEquals(str_to_filename('__'), '_')
         self.assertEquals(str_to_filename('a'), 'a')
         self.assertEquals(str_to_filename('Abc Def'), 'Abc_Def')
@@ -105,7 +104,7 @@ class TestVersion(fixture.Pathed):
         open(os.path.join(self.temp_usable_dir, '1'), 'w')
         self.assertRaises(Exception, Collection, self.temp_usable_dir)
 
-    #def test_collection_unicode(self):
+    #TODO: def test_collection_unicode(self):
     #    pass
 
     def test_create_new_python_version(self):

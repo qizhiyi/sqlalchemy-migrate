@@ -287,7 +287,7 @@ class TestAddDropColumn(fixture.DB):
         self.assertEqual(u'foobar', row['data'])
 
         col.drop()
-    
+
     # TODO: test sequence
     # TODO: test quoting
     # TODO: test non-autoname constraints

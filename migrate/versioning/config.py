@@ -1,4 +1,5 @@
-"""Things that should be imported by all migrate packages"""
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 from sqlalchemy.util import OrderedDict
 

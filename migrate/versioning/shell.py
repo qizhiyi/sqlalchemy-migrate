@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 """The migrate command-line tool."""
 
 import sys
@@ -6,7 +8,7 @@ import logging
 from optparse import OptionParser, BadOptionError
 
 from migrate.versioning import api, exceptions
-from migrate.versioning.base import *
+from migrate.versioning.config import *
 from migrate.versioning.util import asbool
 
 
@@ -64,16 +66,15 @@ def main(argv=None, **kwargs):
     commands = list(api.__all__)
     commands.sort()
 
-    usage = """%%prog COMMAND ...
+    usage = u"""%%prog COMMAND ...
 
     Available commands:
         %s
 
     Enter "%%prog help COMMAND" for information on a particular command.
-    """ % '\n\t'.join(commands)
+    """ % '\n\t'.join([u"%s — %s" % (command.ljust(28), api.command_desc.get(command)) for command in commands])
 
     parser = PassiveOptionParser(usage=usage)
-    #parser.add_option("-v", "--verbose", action="store_true", dest="verbose")
     parser.add_option("-d", "--debug",
                      action="store_true",
                      dest="debug",

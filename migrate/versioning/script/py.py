@@ -8,8 +8,8 @@ from StringIO import StringIO
 
 import migrate
 from migrate.versioning import exceptions, genmodel, schemadiff
-from migrate.versioning.base import operations
-from migrate.versioning.template import template
+from migrate.versioning.config import operations
+from migrate.versioning.template import Template
 from migrate.versioning.script import base
 from migrate.versioning.util import import_path, load_model, construct_engine
 
@@ -27,11 +27,7 @@ class PythonScript(base.BaseScript):
         :returns: :class:`PythonScript instance <migrate.versioning.script.py.PythonScript>`"""
         cls.require_notfound(path)
 
-        # TODO: Use the default script template (defined in the template
-        # module) for now, but we might want to allow people to specify a
-        # different one later.
-        template_file = None
-        src = template.get_script(template_file)
+        src = Template(opts.pop('templates_path', None)).get_script(theme=opts.pop('templates_theme', None))
         shutil.copy(src, path)
 
         return cls(path)
@@ -72,8 +68,7 @@ class PythonScript(base.BaseScript):
             genmodel.ModelGenerator(diff).toUpgradeDowngradePython()
 
         # Store differences into file.
-        # TODO: add custom templates
-        src = template.get_script(None)
+        src = Template(opts.pop('templates_path', None)).get_script(opts.pop('templates_theme', None))
         f = open(src)
         contents = f.read()
         f.close()
@@ -150,13 +145,12 @@ class PythonScript(base.BaseScript):
         """Calls :meth:`migrate.versioning.script.py.verify_module`
         and returns it.
         """
-        if not getattr(self, '_module', None):
+        if not hasattr(self, '_module'):
             self._module = self.verify_module(self.path)
         return self._module
 
     def _func(self, funcname):
-        try:
-            return getattr(self.module, funcname)
-        except AttributeError:
-            msg = "The function %s is not defined in this script"
+        if not hasattr(self.module, funcname):
+            msg = "Function '%s' is not defined in this script"
             raise exceptions.ScriptError(msg % funcname)
+        return getattr(self.module, funcname)

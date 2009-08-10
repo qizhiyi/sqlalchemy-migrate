@@ -5,11 +5,13 @@ import os
 import shutil
 import string
 import logging
-from pkg_resources import resource_string, resource_filename
+
+from pkg_resources import resource_filename
+from tempita import Template as TempitaTemplate
 
 from migrate.versioning import exceptions, script, version, pathed, cfgparse
-from migrate.versioning.template import template
-from migrate.versioning.base import *
+from migrate.versioning.template import Template
+from migrate.versioning.config import *
 
 
 log = logging.getLogger(__name__)
@@ -86,7 +88,7 @@ class Repository(pathed.Pathed):
 
         :raises: :exc:`InvalidRepositoryError <migrate.versioning.exceptions.InvalidRepositoryError>`
         """
-        # Ensure the existance of required files
+        # Ensure the existence of required files
         try:
             cls.require_found(path)
             cls.require_found(os.path.join(path, cls._config))
@@ -94,45 +96,56 @@ class Repository(pathed.Pathed):
         except exceptions.PathNotFoundError, e:
             raise exceptions.InvalidRepositoryError(path)
 
-    # TODO: what are those options?
     @classmethod
-    def prepare_config(cls, pkg, rsrc, name, **opts):
+    def prepare_config(cls, tmpl_dir, name, options=None):
         """
         Prepare a project configuration file for a new project.
+
+        :param tmpl_dir: Path to Repository template
+        :param config_file: Name of the config file in Repository template
+        :param name: Repository name
+        :type tmpl_dir: string
+        :type config_file: string
+        :type name: string
+        :returns: Populated config file
         """
-        # Prepare opts
-        defaults = dict(
-            version_table = 'migrate_version',
-            repository_id = name,
-            required_dbs = [])
+        if options is None:
+            options = {}
+        options.setdefault('version_table', 'migrate_version')
+        options.setdefault('repository_id', name)
+        options.setdefault('required_dbs', [])
 
-        defaults.update(opts)
+        tmpl = open(os.path.join(tmpl_dir, cls._config)).read()
+        ret = TempitaTemplate(tmpl).substitute(options)
 
-        tmpl = resource_string(pkg, rsrc)
-        ret = string.Template(tmpl).substitute(defaults)
+        # cleanup
+        del options['__template_name__']
+
         return ret
 
     @classmethod
     def create(cls, path, name, **opts):
         """Create a repository at a specified path"""
         cls.require_notfound(path)
-
-        pkg, rsrc = template.get_repository(as_pkg=True)
-        tmplpkg = '.'.join((pkg, rsrc))
-        tmplfile = resource_filename(pkg, rsrc)
-        config_text = cls.prepare_config(tmplpkg, cls._config, name, **opts)
+        theme = opts.pop('templates_theme', None)
+        t_path = opts.pop('templates_path', None)
 
         # Create repository
-        shutil.copytree(tmplfile, path)
+        tmpl_dir = Template(t_path).get_repository(theme=theme)
+        shutil.copytree(tmpl_dir, path)
 
         # Edit config defaults
+        config_text = cls.prepare_config(tmpl_dir, name, options=opts)
         fd = open(os.path.join(path, cls._config), 'w')
         fd.write(config_text)
         fd.close()
 
+        opts['repository_name'] = name
+
         # Create a management script
         manager = os.path.join(path, 'manage.py')
-        Repository.create_manage_file(manager, repository=path)
+        Repository.create_manage_file(manager, templates_theme=theme,
+            templates_path=t_path, **opts)
 
         return cls(path)
 
@@ -206,14 +219,12 @@ class Repository(pathed.Pathed):
         """Create a project management script (manage.py)
         
         :param file_: Destination file to be written
-        :param opts: Options that are passed to template
+        :param opts: Options that are passed to :func:`migrate.versioning.shell.main`
         """
-        vars_ = ",".join(["%s='%s'" % var for var in opts.iteritems()])
+        mng_file = Template(opts.pop('templates_path', None))\
+            .get_manage(theme=opts.pop('templates_theme', None))
 
-        pkg, rsrc = template.manage(as_pkg=True)
-        tmpl = resource_string(pkg, rsrc)
-        result = tmpl % dict(defaults=vars_)
-
+        tmpl = open(mng_file).read()
         fd = open(file_, 'w')
-        fd.write(result)
+        fd.write(TempitaTemplate(tmpl).substitute(opts))
         fd.close()

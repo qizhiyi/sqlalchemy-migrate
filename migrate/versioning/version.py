@@ -101,7 +101,7 @@ class Collection(pathed.Pathed):
         filename = '%03d%s.py' % (ver, extra)
         filepath = self._version_path(filename)
 
-        script.PythonScript.create(filepath)
+        script.PythonScript.create(filepath, **k)
         self.versions[ver] = Version(ver, self.path, [filename])
         
     def create_new_sql_version(self, database, **k):
@@ -113,7 +113,7 @@ class Collection(pathed.Pathed):
         for op in ('upgrade', 'downgrade'):
             filename = '%03d_%s_%s.sql' % (ver, database, op)
             filepath = self._version_path(filename)
-            script.SqlScript.create(filepath)
+            script.SqlScript.create(filepath, **k)
             self.versions[ver].add_script(filepath)
         
     def version(self, vernum=None):

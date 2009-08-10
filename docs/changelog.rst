@@ -1,6 +1,6 @@
 0.6.0
 -----
-
+- added option to define custom templates through option ``--templates_path`` and ``--templates_theme``, read more in :ref:`tutorial section <custom-templates>`
 - use Python logging for output, can be shut down by passing ``--disable_logging`` to :func:`migrate.versioning.shell.main`
 - `url` parameter can also be an :class:`Engine` instance (this usage is discouraged though sometimes necessary)
 - added support for SQLAlchemy 0.6 (missing oracle and firebird) by Michael Bayer

@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import logging
+import shutil
 
 from migrate.versioning.script import base
+from migrate.versioning.template import Template
 
 
 log = logging.getLogger(__name__)
@@ -16,7 +18,10 @@ class SqlScript(base.BaseScript):
         
         :returns: :class:`SqlScript instance <migrate.versioning.script.sql.SqlScript>`"""
         cls.require_notfound(path)
-        open(path, "w").close()
+
+        src = Template(opts.pop('templates_path', None)).get_sql_script(theme=opts.pop('templates_theme', None))
+        shutil.copy(src, path)
+        return cls(path)
 
     # TODO: why is step parameter even here?
     def run(self, engine, step=None, executemany=True):

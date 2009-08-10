@@ -7,7 +7,7 @@ import shutil
 import logging
 
 from migrate.versioning import exceptions
-from migrate.versioning.base import *
+from migrate.versioning.config import *
 from migrate.versioning.util import KeyedInstance
 
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from migrate.versioning.base import operations
+from migrate.versioning.config import operations
 from migrate.versioning import pathed, exceptions
 
 

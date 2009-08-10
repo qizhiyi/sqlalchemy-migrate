@@ -36,25 +36,26 @@ from migrate.versioning.util import catch_known_errors, construct_engine
 
 
 log = logging.getLogger(__name__)
-__all__ = [
-    'help',
-    'create',
-    'script',
-    'script_sql',
-    'make_update_script_for_model',
-    'version',
-    'source',
-    'version_control',
-    'db_version',
-    'upgrade',
-    'downgrade',
-    'drop_version_control',
-    'manage',
-    'test',
-    'compare_model_to_db',
-    'create_model',
-    'update_db_from_model',
-]
+command_desc = {
+    'help': 'displays help on a given command',
+    'create': 'create an empty repository at the specified path',
+    'script': 'create an empty change Python script',
+    'script_sql': 'create empty change SQL scripts for given database',
+    'version': 'display the latest version available in a repository',
+    'db_version': 'show the current version of the repository under version control',
+    'source': 'display the Python code for a particular version in this repository',
+    'version_control': 'mark a database as under this repository\'s version control',
+    'upgrade': 'upgrade a database to a later version',
+    'downgrade': 'downgrade a database to an earlier version',
+    'drop_version_control': 'removes version control from a database',
+    'manage': 'creates a Python script that runs Migrate with a set of default values',
+    'test': 'performs the upgrade and downgrade command on the given database',
+    'compare_model_to_db': 'compare MetaData against the current database state',
+    'create_model': 'dump the current database as a Python model to stdout',
+    'make_update_script_for_model': 'create a script changing the old MetaData to the new (current) MetaData',
+    'update_db_from_model': 'modify the database to match the structure of the current MetaData',
+}
+__all__ = command_desc.keys()
 
 Repository = repository.Repository
 ControlledSchema = schema.ControlledSchema
@@ -81,7 +82,6 @@ def help(cmd=None, **opts):
         ret = ret.replace('%prog', sys.argv[0])
     return ret
 
-
 @catch_known_errors
 def create(repository, name, **opts):
     """%prog create REPOSITORY_PATH NAME [--table=TABLE]
@@ -92,7 +92,7 @@ def create(repository, name, **opts):
     'migrate_version'.  This table is created in all version-controlled
     databases.
     """
-    Repository.create(repository, name, **opts)
+    repo_path = Repository.create(repository, name, **opts)
 
 
 @catch_known_errors
@@ -272,7 +272,7 @@ def manage(file, **opts):
         python manage.py version
         %prog version --repository=/path/to/repository
     """
-    return Repository.create_manage_file(file, **opts)
+    Repository.create_manage_file(file, **opts)
 
 
 def compare_model_to_db(url, repository, model, **opts):
@@ -301,7 +301,7 @@ def create_model(url, repository, **opts):
 
 @catch_known_errors
 def make_update_script_for_model(url, repository, oldmodel, model, **opts):
-    """%prog make_update_script_for_model URL REPOSITORY_PATH OLDMODEL MODEL
+    """%prog make_update_script_for_model URL OLDMODEL MODEL REPOSITORY_PATH
 
     Create a script changing the old Python model to the new (current)
     Python model, sending to stdout.
