@@ -1,0 +1,31 @@
+- better SQL scripts support (testing, source viewing)
+
+make_update_script_for_model:
+- calculated differences between models are actually differences between metas
+- columns are not compared?
+- even if two "models" are equal, it doesn't yield so
+
+- controlledschema.drop() drops whole migrate table, maybe there are some other repositories bound to it!
+
+
+0.6.0
+
+- make logging stderr and stdout aware
+- update documentation
+- update repository migration script
+- readd transaction support
+- wrap migration into transaction
+- interactive migration script resolution
+
+- port to unittest2
+- write documentation how to test all databases
+- glossary
+- managing output - logging
+- required_dbs tests
+- add story to changeset tutorial
+- verbose output on migration failures
+
+
+Documentation
+
+- better document 'populate_default'
