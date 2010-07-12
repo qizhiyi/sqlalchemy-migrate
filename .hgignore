@@ -1,0 +1,19 @@
+syntax: glob
+
+
+*.pyc
+*data/*
+*build/*
+*dist/*
+*ez_setup.py
+*.egg/*
+*egg-info/*
+*bin/*
+*include/*
+*lib/*
+lib64
+sa06/*
+.coverage
+test_db.cfg
+nosexcover
+.ropeproject
